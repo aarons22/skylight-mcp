@@ -48,10 +48,14 @@ def cmd_setup(args: argparse.Namespace) -> int:
 
 
 def _resolve_entrypoint() -> str:
+    # Prefer the venv sibling of the current interpreter
+    candidate = Path(sys.executable).resolve().parent / "skylight-mcp"
+    if candidate.exists():
+        return str(candidate)
     path = shutil.which("skylight-mcp")
-    if not path:
-        raise RuntimeError("Could not find 'skylight-mcp' in PATH.")
-    return path
+    if path:
+        return path
+    raise RuntimeError("Could not find 'skylight-mcp' in PATH or alongside current Python interpreter.")
 
 
 def _write_plist(entrypoint: str) -> None:
