@@ -41,6 +41,11 @@ fi
 python3 -m venv "$INSTALL_DIR/.venv"
 "$INSTALL_DIR/.venv/bin/pip" install -e "$INSTALL_DIR"
 
+# Ensure CLI is on PATH via ~/.local/bin
+BIN_DIR="$HOME/.local/bin"
+mkdir -p "$BIN_DIR"
+ln -sf "$INSTALL_DIR/.venv/bin/skylight-mcp" "$BIN_DIR/skylight-mcp"
+
 # Run guided setup if config missing, then install LaunchAgent
 CONFIG_FILE="$HOME/Library/Application Support/skylight-mcp/config.toml"
 CLI_BIN="$INSTALL_DIR/.venv/bin/skylight-mcp"
@@ -61,6 +66,8 @@ fi
 
 cat <<OUT
 Installed and started $APP_NAME.
+CLI:
+  Ensure $BIN_DIR is on your PATH, then run: skylight-mcp --help
 Logs:
   $HOME/Library/Logs/skylight-mcp.out.log
   $HOME/Library/Logs/skylight-mcp.err.log
