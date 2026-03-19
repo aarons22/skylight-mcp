@@ -18,7 +18,7 @@ pip install -e .
 skylight-mcp setup
 ```
 
-This writes `~/Library/Application Support/skylight-mcp/config.toml`.
+This writes `~/Library/Application Support/skylight-mcp/config.toml` (including the local MCP port).
 You can edit this file later if needed.
 
 Environment overrides (optional):

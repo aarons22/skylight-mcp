@@ -21,6 +21,7 @@ class Settings:
     skylight_email: str
     skylight_password: str
     skylight_frame_id: Optional[str] = None
+    skylight_port: int = 8000
 
 
 def ensure_config_dir() -> None:
@@ -34,9 +35,9 @@ def load_config_file() -> Dict[str, Any]:
     return data if isinstance(data, dict) else {}
 
 
-def save_config(email: str, password: str, frame_id: Optional[str]) -> None:
+def save_config(email: str, password: str, frame_id: Optional[str], port: int) -> None:
     ensure_config_dir()
-    lines = ["[skylight]", f"email = \"{email}\"", f"password = \"{password}\""]
+    lines = ["[skylight]", f"email = \"{email}\"", f"password = \"{password}\"", f"port = {port}"]
     if frame_id:
         lines.append(f"frame_id = \"{frame_id}\"")
     CONFIG_FILE.write_text("\n".join(lines) + "\n")
@@ -50,6 +51,7 @@ def get_settings(overrides: Optional[Dict[str, str]] = None) -> Settings:
     email = skylight.get("email")
     password = skylight.get("password")
     frame_id = skylight.get("frame_id")
+    port = skylight.get("port", 8000)
 
     # Env overrides
     import os
@@ -57,20 +59,31 @@ def get_settings(overrides: Optional[Dict[str, str]] = None) -> Settings:
     email = os.getenv("SKYLIGHT_EMAIL", email)
     password = os.getenv("SKYLIGHT_PASSWORD", password)
     frame_id = os.getenv("SKYLIGHT_FRAME_ID", frame_id)
+    env_port = os.getenv("SKYLIGHT_PORT")
+    if env_port:
+        port = env_port
 
     # Explicit overrides (CLI args)
     if overrides:
         email = overrides.get("email", email)
         password = overrides.get("password", password)
         frame_id = overrides.get("frame_id", frame_id)
+        if "port" in overrides and overrides["port"] is not None:
+            port = overrides["port"]
 
     if not email or not password:
         raise ValueError("Missing Skylight credentials. Run 'skylight-mcp setup'.")
+
+    try:
+        port = int(port)
+    except Exception as exc:
+        raise ValueError(f"Invalid port: {port}") from exc
 
     return Settings(
         skylight_email=email,
         skylight_password=password,
         skylight_frame_id=frame_id,
+        skylight_port=port,
     )
 
 

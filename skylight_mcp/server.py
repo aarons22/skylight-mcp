@@ -179,7 +179,8 @@ def delete_meal_sitting(
 
 
 def main() -> None:
-    mcp.run()
+    settings = get_settings()
+    mcp.run(transport="http", host="127.0.0.1", port=settings.skylight_port)
 
 
 if __name__ == "__main__":

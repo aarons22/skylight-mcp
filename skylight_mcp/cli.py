@@ -27,12 +27,22 @@ def cmd_setup(args: argparse.Namespace) -> int:
     email = args.email or input("Skylight email: ").strip()
     password = args.password or getpass.getpass("Skylight password: ").strip()
     frame_id = args.frame_id
+    port = args.port
+
+    if port is None:
+        port_str = input("Local MCP port [8000]: ").strip()
+        port = int(port_str) if port_str else 8000
+    try:
+        port = int(port)
+    except Exception:
+        _print("❌ Invalid port.")
+        return 1
 
     if not email or not password:
         _print("❌ Email and password are required.")
         return 1
 
-    save_config(email=email, password=password, frame_id=frame_id)
+    save_config(email=email, password=password, frame_id=frame_id, port=port)
 
     # Verify auth
     try:
@@ -173,6 +183,7 @@ def create_parser() -> argparse.ArgumentParser:
     setup_parser.add_argument("--email", help="Skylight email")
     setup_parser.add_argument("--password", help="Skylight password")
     setup_parser.add_argument("--frame-id", help="Default frame id")
+    setup_parser.add_argument("--port", type=int, help="Local MCP port")
 
     subparsers.add_parser("run", help="Run MCP server in foreground")
     subparsers.add_parser("install", help="Install LaunchAgent")
