@@ -82,7 +82,16 @@ class SkylightClient:
         if cached:
             self._auth = cached
             return cached
-        auth = self._login(self.base_url)
+        try:
+            auth = self._login(self.base_url)
+        except httpx.RequestError:
+            auth = self._login(self.fallback_base_url)
+        except httpx.HTTPStatusError as exc:
+            status = exc.response.status_code if exc.response is not None else None
+            if status in (404, 502, 503, 504):
+                auth = self._login(self.fallback_base_url)
+            else:
+                raise
         self._cache_token(auth)
         self._auth = auth
         return auth
